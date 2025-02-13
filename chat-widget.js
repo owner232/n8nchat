@@ -9,14 +9,13 @@
             --chat--color-font: var(--n8n-chat-font-color, #333333);
             font-family: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
         }
+        
         .n8n-chat-widget .chat-container {
             position: fixed;
             bottom: 20px;
             right: 20px;
             z-index: 1000;
-            /* Initially show header only as minimized */
-            display: flex;
-            flex-direction: column;
+            display: none;
             width: 380px;
             height: 600px;
             background: var(--chat--color-background);
@@ -25,20 +24,18 @@
             border: 1px solid rgba(133, 79, 255, 0.2);
             overflow: hidden;
             font-family: inherit;
+            flex-direction: column;
         }
+        
         .n8n-chat-widget .chat-container.position-left {
             right: auto;
             left: 20px;
         }
-        /* "open" state: full widget view */
+        
         .n8n-chat-widget .chat-container.open {
             display: flex;
         }
-        /* "minimized" state: only header visible */
-        .n8n-chat-widget .chat-container.minimized .new-conversation,
-        .n8n-chat-widget .chat-container.minimized .chat-interface {
-            display: none;
-        }
+        
         .n8n-chat-widget .brand-header {
             padding: 16px;
             display: flex;
@@ -47,18 +44,11 @@
             border-bottom: 1px solid rgba(133, 79, 255, 0.1);
             position: relative;
         }
-        .n8n-chat-widget .brand-header img {
-            width: 32px;
-            height: 32px;
-        }
-        .n8n-chat-widget .brand-header span {
-            font-size: 18px;
-            font-weight: 500;
-            color: var(--chat--color-font);
-        }
-        .n8n-chat-widget .close-button,
-        .n8n-chat-widget .minimize-button {
+        
+        /* Only include a close button in the chat interface (not in the welcome/new conversation view) */
+        .n8n-chat-widget .close-button {
             position: absolute;
+            right: 16px;
             top: 50%;
             transform: translateY(-50%);
             background: none;
@@ -73,22 +63,33 @@
             font-size: 20px;
             opacity: 0.6;
         }
-        .n8n-chat-widget .close-button {
-            right: 16px;
-        }
-        .n8n-chat-widget .minimize-button {
-            right: 40px;
-        }
-        .n8n-chat-widget .close-button:hover,
-        .n8n-chat-widget .minimize-button:hover {
+        
+        .n8n-chat-widget .close-button:hover {
             opacity: 1;
         }
+        
+        .n8n-chat-widget .brand-header img {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .n8n-chat-widget .brand-header span {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--chat--color-font);
+        }
+        
         .n8n-chat-widget .new-conversation {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             padding: 20px;
             text-align: center;
             width: 100%;
             max-width: 300px;
         }
+        
         .n8n-chat-widget .welcome-text {
             font-size: 24px;
             font-weight: 600;
@@ -96,6 +97,7 @@
             margin-bottom: 24px;
             line-height: 1.3;
         }
+        
         .n8n-chat-widget .new-chat-btn {
             display: flex;
             align-items: center;
@@ -111,29 +113,36 @@
             font-size: 16px;
             transition: transform 0.3s;
             font-weight: 500;
+            font-family: inherit;
             margin-bottom: 12px;
         }
+        
         .n8n-chat-widget .new-chat-btn:hover {
             transform: scale(1.02);
         }
+        
         .n8n-chat-widget .message-icon {
             width: 20px;
             height: 20px;
         }
+        
         .n8n-chat-widget .response-text {
             font-size: 14px;
             color: var(--chat--color-font);
             opacity: 0.7;
             margin: 0;
         }
+        
         .n8n-chat-widget .chat-interface {
             display: none;
             flex-direction: column;
             height: 100%;
         }
+        
         .n8n-chat-widget .chat-interface.active {
             display: flex;
         }
+        
         .n8n-chat-widget .chat-messages {
             flex: 1;
             overflow-y: auto;
@@ -142,6 +151,7 @@
             display: flex;
             flex-direction: column;
         }
+        
         .n8n-chat-widget .chat-message {
             padding: 12px 16px;
             margin: 8px 0;
@@ -151,6 +161,7 @@
             font-size: 14px;
             line-height: 1.5;
         }
+        
         .n8n-chat-widget .chat-message.user {
             background: linear-gradient(135deg, var(--chat--color-primary) 0%, var(--chat--color-secondary) 100%);
             color: white;
@@ -158,6 +169,7 @@
             box-shadow: 0 4px 12px rgba(133, 79, 255, 0.2);
             border: none;
         }
+        
         .n8n-chat-widget .chat-message.bot {
             background: var(--chat--color-background);
             border: 1px solid rgba(133, 79, 255, 0.2);
@@ -165,6 +177,13 @@
             align-self: flex-start;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
+        
+        /* Business name appears above the bot's message text */
+        .n8n-chat-widget .chat-message.bot .business-name {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        
         .n8n-chat-widget .chat-input {
             padding: 16px;
             background: var(--chat--color-background);
@@ -172,6 +191,7 @@
             display: flex;
             gap: 8px;
         }
+        
         .n8n-chat-widget .chat-input textarea {
             flex: 1;
             padding: 12px;
@@ -180,12 +200,15 @@
             background: var(--chat--color-background);
             color: var(--chat--color-font);
             resize: none;
+            font-family: inherit;
             font-size: 14px;
         }
+        
         .n8n-chat-widget .chat-input textarea::placeholder {
             color: var(--chat--color-font);
             opacity: 0.6;
         }
+        
         .n8n-chat-widget .chat-input button {
             background: linear-gradient(135deg, var(--chat--color-primary) 0%, var(--chat--color-secondary) 100%);
             color: white;
@@ -194,11 +217,14 @@
             padding: 0 20px;
             cursor: pointer;
             transition: transform 0.2s;
+            font-family: inherit;
             font-weight: 500;
         }
+        
         .n8n-chat-widget .chat-input button:hover {
             transform: scale(1.05);
         }
+        
         .n8n-chat-widget .chat-toggle {
             position: fixed;
             bottom: 20px;
@@ -217,31 +243,34 @@
             align-items: center;
             justify-content: center;
         }
+        
         .n8n-chat-widget .chat-toggle.position-left {
             right: auto;
             left: 20px;
         }
+        
         .n8n-chat-widget .chat-toggle:hover {
             transform: scale(1.05);
         }
+        
         .n8n-chat-widget .chat-toggle svg {
             width: 24px;
             height: 24px;
             fill: currentColor;
         }
     `;
-
+    
     // Load Geist font
     const fontLink = document.createElement('link');
     fontLink.rel = 'stylesheet';
     fontLink.href = 'https://cdn.jsdelivr.net/npm/geist@1.0.0/dist/fonts/geist-sans/style.css';
     document.head.appendChild(fontLink);
-
+    
     // Inject styles
     const styleSheet = document.createElement('style');
     styleSheet.textContent = styles;
     document.head.appendChild(styleSheet);
-
+    
     // Default configuration
     const defaultConfig = {
         webhook: {
@@ -252,8 +281,11 @@
             logo: '',
             name: '',
             welcomeText: '',
-            responseTimeText: ''
-            // poweredBy removed
+            responseTimeText: '',
+            poweredBy: {
+                text: 'Powered by n8n',
+                link: 'https://n8n.partnerlinks.io/m8a94i19zhqq?utm_source=nocodecreative.io'
+            }
         },
         style: {
             primaryColor: '',
@@ -263,7 +295,7 @@
             fontColor: '#333333'
         }
     };
-
+    
     // Merge user config with defaults
     const config = window.ChatWidgetConfig ? 
         {
@@ -271,13 +303,13 @@
             branding: { ...defaultConfig.branding, ...window.ChatWidgetConfig.branding },
             style: { ...defaultConfig.style, ...window.ChatWidgetConfig.style }
         } : defaultConfig;
-
+    
     // Prevent multiple initializations
     if (window.N8NChatWidgetInitialized) return;
     window.N8NChatWidgetInitialized = true;
-
+    
     let currentSessionId = '';
-
+    
     // Create widget container
     const widgetContainer = document.createElement('div');
     widgetContainer.className = 'n8n-chat-widget';
@@ -287,17 +319,15 @@
     widgetContainer.style.setProperty('--n8n-chat-secondary-color', config.style.secondaryColor);
     widgetContainer.style.setProperty('--n8n-chat-background-color', config.style.backgroundColor);
     widgetContainer.style.setProperty('--n8n-chat-font-color', config.style.fontColor);
-
+    
     const chatContainer = document.createElement('div');
     chatContainer.className = `chat-container${config.style.position === 'left' ? ' position-left' : ''}`;
     
-    // New conversation HTML with minimize button added
+    // Welcome/New Conversation view (no close button here)
     const newConversationHTML = `
         <div class="brand-header">
             <img src="${config.branding.logo}" alt="${config.branding.name}">
             <span>${config.branding.name}</span>
-            <button class="minimize-button">_</button>
-            <button class="close-button">×</button>
         </div>
         <div class="new-conversation">
             <h2 class="welcome-text">${config.branding.welcomeText}</h2>
@@ -310,24 +340,26 @@
             <p class="response-text">${config.branding.responseTimeText}</p>
         </div>
     `;
-
-    // Chat interface HTML with minimize button and WITHOUT the footer
+    
+    // Chat interface view (with a close button)
     const chatInterfaceHTML = `
-        <div class="brand-header">
-            <img src="${config.branding.logo}" alt="${config.branding.name}">
-            <span>${config.branding.name}</span>
-            <button class="minimize-button">_</button>
-            <button class="close-button">×</button>
-        </div>
-        <div class="chat-messages"></div>
-        <div class="chat-input">
-            <textarea placeholder="Type your message here..." rows="1"></textarea>
-            <button type="submit">Send</button>
+        <div class="chat-interface">
+            <div class="brand-header">
+                <img src="${config.branding.logo}" alt="${config.branding.name}">
+                <span>${config.branding.name}</span>
+                <button class="close-button">×</button>
+            </div>
+            <div class="chat-messages"></div>
+            <div class="chat-input">
+                <textarea placeholder="Type your message here..." rows="1"></textarea>
+                <button type="submit">Send</button>
+            </div>
         </div>
     `;
     
     chatContainer.innerHTML = newConversationHTML + chatInterfaceHTML;
     
+    // Chat toggle button (always visible when chat is closed)
     const toggleButton = document.createElement('button');
     toggleButton.className = `chat-toggle${config.style.position === 'left' ? ' position-left' : ''}`;
     toggleButton.innerHTML = `
@@ -338,18 +370,21 @@
     widgetContainer.appendChild(chatContainer);
     widgetContainer.appendChild(toggleButton);
     document.body.appendChild(widgetContainer);
-
+    
+    // Select elements
     const newChatBtn = chatContainer.querySelector('.new-chat-btn');
     const chatInterface = chatContainer.querySelector('.chat-interface');
     const messagesContainer = chatContainer.querySelector('.chat-messages');
     const textarea = chatContainer.querySelector('textarea');
     const sendButton = chatContainer.querySelector('button[type="submit"]');
-
-    // Utility: generate a session ID
+    const closeButtons = chatContainer.querySelectorAll('.close-button');
+    
+    // Utility: generate a unique session ID
     function generateUUID() {
         return crypto.randomUUID();
     }
-
+    
+    // Start a new conversation (triggered from the welcome view)
     async function startNewConversation() {
         currentSessionId = generateUUID();
         const data = [{
@@ -358,31 +393,38 @@
             route: config.webhook.route,
             metadata: { userId: "" }
         }];
-
+    
         try {
             const response = await fetch(config.webhook.url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
+    
             const responseData = await response.json();
-            // Hide new conversation view and show chat interface
-            chatContainer.querySelector('.brand-header').style.display = 'none';
+            // Hide the welcome view and show the chat interface
             chatContainer.querySelector('.new-conversation').style.display = 'none';
             chatInterface.classList.add('active');
-
-            // Prepend company name label in bot message
+    
+            // Render the bot's initial message with the business name above the text
             const botMessageDiv = document.createElement('div');
             botMessageDiv.className = 'chat-message bot';
-            const outputText = Array.isArray(responseData) ? responseData[0].output : responseData.output;
-            botMessageDiv.innerHTML = `<strong>${config.branding.name}:</strong> ${outputText}`;
+            const businessNameDiv = document.createElement('div');
+            businessNameDiv.className = 'business-name';
+            businessNameDiv.textContent = config.branding.name;
+            const messageTextDiv = document.createElement('div');
+            messageTextDiv.className = 'message-text';
+            messageTextDiv.textContent = Array.isArray(responseData) ? responseData[0].output : responseData.output;
+            botMessageDiv.appendChild(businessNameDiv);
+            botMessageDiv.appendChild(messageTextDiv);
             messagesContainer.appendChild(botMessageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         } catch (error) {
             console.error('Error:', error);
         }
     }
-
+    
+    // Send a message from the user and render the bot's reply
     async function sendMessage(message) {
         const messageData = {
             action: "sendMessage",
@@ -391,34 +433,53 @@
             chatInput: message,
             metadata: { userId: "" }
         };
-
-        // Prepend "You:" label for the user message
+    
+        // Render the user's message
         const userMessageDiv = document.createElement('div');
         userMessageDiv.className = 'chat-message user';
-        userMessageDiv.innerHTML = `<strong>You:</strong> ${message}`;
+        userMessageDiv.textContent = message;
         messagesContainer.appendChild(userMessageDiv);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
+    
         try {
             const response = await fetch(config.webhook.url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(messageData)
             });
+            
             const data = await response.json();
+    
+            // Render the bot's reply with the business name on top
             const botMessageDiv = document.createElement('div');
             botMessageDiv.className = 'chat-message bot';
-            const outputText = Array.isArray(data) ? data[0].output : data.output;
-            botMessageDiv.innerHTML = `<strong>${config.branding.name}:</strong> ${outputText}`;
+            const businessNameDiv = document.createElement('div');
+            businessNameDiv.className = 'business-name';
+            businessNameDiv.textContent = config.branding.name;
+            const messageTextDiv = document.createElement('div');
+            messageTextDiv.className = 'message-text';
+            messageTextDiv.textContent = Array.isArray(data) ? data[0].output : data.output;
+            botMessageDiv.appendChild(businessNameDiv);
+            botMessageDiv.appendChild(messageTextDiv);
             messagesContainer.appendChild(botMessageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         } catch (error) {
             console.error('Error:', error);
         }
     }
-
+    
+    // Event listeners
+    
+    // Clicking the chat toggle opens the chat and hides the toggle button
+    toggleButton.addEventListener('click', () => {
+        chatContainer.classList.add('open');
+        toggleButton.style.display = 'none';
+    });
+    
+    // Clicking the new chat button (from welcome view) starts a new conversation
     newChatBtn.addEventListener('click', startNewConversation);
     
+    // Send button in chat interface
     sendButton.addEventListener('click', () => {
         const message = textarea.value.trim();
         if (message) {
@@ -427,6 +488,7 @@
         }
     });
     
+    // Allow sending message on Enter (without shift)
     textarea.addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -438,32 +500,16 @@
         }
     });
     
-    // Toggle button: if minimized, restore full view; otherwise toggle open state.
-    toggleButton.addEventListener('click', () => {
-        if (chatContainer.classList.contains('minimized')) {
-            chatContainer.classList.remove('minimized');
-            chatContainer.classList.add('open');
-        } else {
-            chatContainer.classList.toggle('open');
-        }
-    });
-
-    // Close button: collapse (remove "open" state)
-    const closeButtons = chatContainer.querySelectorAll('.close-button');
+    // Close button(s) in the chat interface close the chat and show the toggle button again
     closeButtons.forEach(button => {
         button.addEventListener('click', () => {
             chatContainer.classList.remove('open');
-        });
-    });
-
-    // Minimize button: toggle minimized state (ensure widget is open first)
-    const minimizeButtons = chatContainer.querySelectorAll('.minimize-button');
-    minimizeButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            if (!chatContainer.classList.contains('open')) {
-                chatContainer.classList.add('open');
-            }
-            chatContainer.classList.toggle('minimized');
+            // Reset the chat view (re-show the welcome view for a new conversation)
+            chatInterface.classList.remove('active');
+            chatContainer.querySelector('.new-conversation').style.display = 'block';
+            // Clear messages if desired (optional)
+            messagesContainer.innerHTML = '';
+            toggleButton.style.display = 'flex';
         });
     });
 })();
