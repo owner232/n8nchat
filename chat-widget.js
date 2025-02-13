@@ -384,47 +384,39 @@
         return crypto.randomUUID();
     }
     
-    // Start a new conversation (triggered from the welcome view)
-    async function startNewConversation() {
+    // Start a new conversation without making an API call for the greeting
+    function startNewConversation() {
+        // Generate a new session ID (if needed for later messages)
         currentSessionId = generateUUID();
-        const data = [{
-            action: "loadPreviousSession",
-            sessionId: currentSessionId,
-            route: config.webhook.route,
-            metadata: { userId: "" }
-        }];
     
-        try {
-            const response = await fetch(config.webhook.url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+        // Hide the welcome view and show the chat interface
+        chatContainer.querySelector('.new-conversation').style.display = 'none';
+        chatInterface.classList.add('active');
     
-            const responseData = await response.json();
-            // Hide the welcome view and show the chat interface
-            chatContainer.querySelector('.new-conversation').style.display = 'none';
-            chatInterface.classList.add('active');
+        // Render a static greeting message
+        const botMessageDiv = document.createElement('div');
+        botMessageDiv.className = 'chat-message bot';
     
-            // Render the bot's initial message with the business name above the text
-            const botMessageDiv = document.createElement('div');
-            botMessageDiv.className = 'chat-message bot';
-            const businessNameDiv = document.createElement('div');
-            businessNameDiv.className = 'business-name';
-            businessNameDiv.textContent = config.branding.name;
-            const messageTextDiv = document.createElement('div');
-            messageTextDiv.className = 'message-text';
-            messageTextDiv.textContent = Array.isArray(responseData) ? responseData[0].output : responseData.output;
-            botMessageDiv.appendChild(businessNameDiv);
-            botMessageDiv.appendChild(messageTextDiv);
-            messagesContainer.appendChild(botMessageDiv);
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        } catch (error) {
-            console.error('Error:', error);
-        }
+        // Add the business name (or bot name)
+        const businessNameDiv = document.createElement('div');
+        businessNameDiv.className = 'business-name';
+        businessNameDiv.textContent = config.branding.name;
+    
+        // Set your static greeting message here
+        const messageTextDiv = document.createElement('div');
+        messageTextDiv.className = 'message-text';
+        messageTextDiv.textContent = "Hi, how can I help you?";  // <-- Your greeting text
+    
+        // Append the name and text to the bot message container
+        botMessageDiv.appendChild(businessNameDiv);
+        botMessageDiv.appendChild(messageTextDiv);
+        
+        // Append the bot message to the messages container and scroll to bottom
+        messagesContainer.appendChild(botMessageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
     
-    // Send a message from the user and render the bot's reply
+    // Send a message from the user and render the bot's reply via API call
     async function sendMessage(message) {
         const messageData = {
             action: "sendMessage",
