@@ -45,6 +45,7 @@
             position: relative;
         }
         
+        /* Only include a close button in the chat interface (not in the welcome/new conversation view) */
         .n8n-chat-widget .close-button {
             position: absolute;
             right: 16px;
@@ -76,6 +77,60 @@
             font-size: 18px;
             font-weight: 500;
             color: var(--chat--color-font);
+        }
+        
+        .n8n-chat-widget .new-conversation {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .n8n-chat-widget .welcome-text {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--chat--color-font);
+            margin-bottom: 24px;
+            line-height: 1.3;
+        }
+        
+        .n8n-chat-widget .new-chat-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--chat--color-primary) 0%, var(--chat--color-secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.3s;
+            font-weight: 500;
+            font-family: inherit;
+            margin-bottom: 12px;
+        }
+        
+        .n8n-chat-widget .new-chat-btn:hover {
+            transform: scale(1.02);
+        }
+        
+        .n8n-chat-widget .message-icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .n8n-chat-widget .response-text {
+            font-size: 14px;
+            color: var(--chat--color-font);
+            opacity: 0.7;
+            margin: 0;
         }
         
         .n8n-chat-widget .chat-interface {
@@ -123,7 +178,7 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
         
-        /* Business name above bot messages */
+        /* Business name appears above the bot's message text */
         .n8n-chat-widget .chat-message.bot .business-name {
             font-weight: bold;
             margin-bottom: 4px;
@@ -225,7 +280,7 @@
         branding: {
             logo: '',
             name: '',
-            welcomeText: 'Hi, how can I help you?', // Default welcome text
+            welcomeText: '',
             responseTimeText: '',
             poweredBy: {
                 text: 'Powered by n8n',
@@ -265,7 +320,28 @@
     widgetContainer.style.setProperty('--n8n-chat-background-color', config.style.backgroundColor);
     widgetContainer.style.setProperty('--n8n-chat-font-color', config.style.fontColor);
     
-    // Only the chat interface (welcome view removed)
+    const chatContainer = document.createElement('div');
+    chatContainer.className = `chat-container${config.style.position === 'left' ? ' position-left' : ''}`;
+    
+    // Welcome/New Conversation view (no close button here)
+    const newConversationHTML = `
+        <div class="brand-header">
+            <img src="${config.branding.logo}" alt="${config.branding.name}">
+            <span>${config.branding.name}</span>
+        </div>
+        <div class="new-conversation">
+            <h2 class="welcome-text">${config.branding.welcomeText}</h2>
+            <button class="new-chat-btn">
+                <svg class="message-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.2L4 17.2V4h16v12z"/>
+                </svg>
+                Send us a message
+            </button>
+            <p class="response-text">${config.branding.responseTimeText}</p>
+        </div>
+    `;
+    
+    // Chat interface view (with a close button)
     const chatInterfaceHTML = `
         <div class="chat-interface">
             <div class="brand-header">
@@ -281,9 +357,7 @@
         </div>
     `;
     
-    const chatContainerElem = document.createElement('div');
-    chatContainerElem.className = `chat-container${config.style.position === 'left' ? ' position-left' : ''}`;
-    chatContainerElem.innerHTML = chatInterfaceHTML;
+    chatContainer.innerHTML = newConversationHTML + chatInterfaceHTML;
     
     // Chat toggle button (always visible when chat is closed)
     const toggleButton = document.createElement('button');
@@ -293,32 +367,46 @@
             <path d="M12 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5L2.5 21.5l4.5-.838A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.476 0-2.886-.313-4.156-.878l-3.156.586.586-3.156A7.962 7.962 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"/>
         </svg>`;
     
-    widgetContainer.appendChild(chatContainerElem);
+    widgetContainer.appendChild(chatContainer);
     widgetContainer.appendChild(toggleButton);
     document.body.appendChild(widgetContainer);
     
-    // Select elements from chat interface
-    const chatInterface = chatContainerElem.querySelector('.chat-interface');
-    const messagesContainer = chatContainerElem.querySelector('.chat-messages');
-    const textarea = chatContainerElem.querySelector('textarea');
-    const sendButton = chatContainerElem.querySelector('button[type="submit"]');
-    const closeButtons = chatContainerElem.querySelectorAll('.close-button');
+    // Select elements
+    const newChatBtn = chatContainer.querySelector('.new-chat-btn');
+    const chatInterface = chatContainer.querySelector('.chat-interface');
+    const messagesContainer = chatContainer.querySelector('.chat-messages');
+    const textarea = chatContainer.querySelector('textarea');
+    const sendButton = chatContainer.querySelector('button[type="submit"]');
+    const closeButtons = chatContainer.querySelectorAll('.close-button');
     
     // Utility: generate a unique session ID
     function generateUUID() {
         return crypto.randomUUID();
     }
     
-    // Event listeners
-    
-    // Clicking the chat toggle opens the chat, generates a session ID, and displays a welcome message
-    toggleButton.addEventListener('click', () => {
-        chatContainerElem.classList.add('open');
-        toggleButton.style.display = 'none';
+    // Start a new conversation (triggered from the welcome view)
+    async function startNewConversation() {
         currentSessionId = generateUUID();
+        const data = [{
+            action: "loadPreviousSession",
+            sessionId: currentSessionId,
+            route: config.webhook.route,
+            metadata: { userId: "" }
+        }];
     
-        // Display the default welcome message (without making an API call)
-        if (messagesContainer.children.length === 0) {
+        try {
+            const response = await fetch(config.webhook.url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+    
+            const responseData = await response.json();
+            // Hide the welcome view and show the chat interface
+            chatContainer.querySelector('.new-conversation').style.display = 'none';
+            chatInterface.classList.add('active');
+    
+            // Render the bot's initial message with the business name above the text
             const botMessageDiv = document.createElement('div');
             botMessageDiv.className = 'chat-message bot';
             const businessNameDiv = document.createElement('div');
@@ -326,37 +414,17 @@
             businessNameDiv.textContent = config.branding.name;
             const messageTextDiv = document.createElement('div');
             messageTextDiv.className = 'message-text';
-            let welcomeText = config.branding.welcomeText || "Hi, how can I help you?";
-            messageTextDiv.textContent = welcomeText;
+            messageTextDiv.textContent = Array.isArray(responseData) ? responseData[0].output : responseData.output;
             botMessageDiv.appendChild(businessNameDiv);
             botMessageDiv.appendChild(messageTextDiv);
             messagesContainer.appendChild(botMessageDiv);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        } catch (error) {
+            console.error('Error:', error);
         }
-    });
+    }
     
-    // Send button in chat interface
-    sendButton.addEventListener('click', () => {
-        const message = textarea.value.trim();
-        if (message) {
-            sendMessage(message);
-            textarea.value = '';
-        }
-    });
-    
-    // Allow sending message on Enter (without shift)
-    textarea.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            const message = textarea.value.trim();
-            if (message) {
-                sendMessage(message);
-                textarea.value = '';
-            }
-        }
-    });
-    
-    // Send a message (API call happens when the user sends a message)
+    // Send a message from the user and render the bot's reply
     async function sendMessage(message) {
         const messageData = {
             action: "sendMessage",
@@ -382,7 +450,7 @@
             
             const data = await response.json();
     
-            // Render the bot's reply with business name on top
+            // Render the bot's reply with the business name on top
             const botMessageDiv = document.createElement('div');
             botMessageDiv.className = 'chat-message bot';
             const businessNameDiv = document.createElement('div');
@@ -400,11 +468,46 @@
         }
     }
     
+    // Event listeners
+    
+    // Clicking the chat toggle opens the chat and hides the toggle button
+    toggleButton.addEventListener('click', () => {
+        chatContainer.classList.add('open');
+        toggleButton.style.display = 'none';
+    });
+    
+    // Clicking the new chat button (from welcome view) starts a new conversation
+    newChatBtn.addEventListener('click', startNewConversation);
+    
+    // Send button in chat interface
+    sendButton.addEventListener('click', () => {
+        const message = textarea.value.trim();
+        if (message) {
+            sendMessage(message);
+            textarea.value = '';
+        }
+    });
+    
+    // Allow sending message on Enter (without shift)
+    textarea.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            const message = textarea.value.trim();
+            if (message) {
+                sendMessage(message);
+                textarea.value = '';
+            }
+        }
+    });
+    
     // Close button(s) in the chat interface close the chat and show the toggle button again
     closeButtons.forEach(button => {
         button.addEventListener('click', () => {
-            chatContainerElem.classList.remove('open');
+            chatContainer.classList.remove('open');
+            // Reset the chat view (re-show the welcome view for a new conversation)
             chatInterface.classList.remove('active');
+            chatContainer.querySelector('.new-conversation').style.display = 'block';
+            // Clear messages if desired (optional)
             messagesContainer.innerHTML = '';
             toggleButton.style.display = 'flex';
         });
